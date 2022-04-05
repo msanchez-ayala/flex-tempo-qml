@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtMultimedia
 
 ApplicationWindow {
     id: window
@@ -8,7 +9,11 @@ ApplicationWindow {
     visible: true
     title: qsTr("Flex Tempo")
 
-    readonly property int margins: 12
+    MediaPlayer {
+        id: mediaPlayer
+        source: 'file:///Users/Marco/Documents/Recordings/Corey F./East of the Sun.mp3'
+        audioOutput: AudioOutput {}
+    }
 
     header: ToolBar {
         contentHeight: toolButton.implicitHeight
@@ -24,6 +29,14 @@ ApplicationWindow {
                     drawer.open()
                 }
             }
+        }
+
+        ToolButton {
+            id: startButton
+            anchors.left: toolButton.right
+            text: 'start'
+            font.pixelSize: Qt.application.font.pixelSize * 1.6
+            onClicked: mediaPlayer.play()
         }
     }
 

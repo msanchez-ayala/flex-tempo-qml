@@ -28,7 +28,7 @@ ListModel {
     function insertNewUrl(fileUrl) {
         const fileName = urlToFileName(fileUrl)
         const entry = {url: fileUrl.toString(), fileName: fileName}
-        console.log('entry filename', entry.fileName)
+        console.log('entry filename', entry.fileName, entry.url)
         insert(0, entry)
         console.log(get(0).fileName)
     }
