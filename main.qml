@@ -6,7 +6,9 @@ ApplicationWindow {
     width: 640
     height: 480
     visible: true
-    title: qsTr("Stack")
+    title: qsTr("Flex Tempo")
+
+    readonly property int margins: 12
 
     header: ToolBar {
         contentHeight: toolButton.implicitHeight
@@ -22,11 +24,6 @@ ApplicationWindow {
                     drawer.open()
                 }
             }
-        }
-
-        Label {
-            text: stackView.currentItem.title
-            anchors.centerIn: parent
         }
     }
 
@@ -50,7 +47,7 @@ ApplicationWindow {
                 text: qsTr("Audio Selection")
                 width: parent.width
                 onClicked: {
-                    stackView.push("AudioSelectionForm.ui.qml")
+                    stackView.push("AudioSelectionPage.qml")
                     drawer.close()
                 }
             }
