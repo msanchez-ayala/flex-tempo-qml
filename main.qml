@@ -16,6 +16,7 @@ ApplicationWindow {
     }
 
     header: ToolBar {
+        id: headerToolBar
         contentHeight: toolButton.implicitHeight
 
         ToolButton {
@@ -35,7 +36,6 @@ ApplicationWindow {
             id: startButton
             anchors.left: toolButton.right
             text: 'start'
-            font.pixelSize: Qt.application.font.pixelSize * 1.6
             onClicked: mediaPlayer.play()
         }
     }
@@ -52,7 +52,7 @@ ApplicationWindow {
                 text: qsTr("Home")
                 width: parent.width
                 onClicked: {
-                    stackView.push("HomeForm.ui.qml")
+                    stackView.push(homePageComponent)
                     drawer.close()
                 }
             }
@@ -60,7 +60,7 @@ ApplicationWindow {
                 text: qsTr("Audio Selection")
                 width: parent.width
                 onClicked: {
-                    stackView.push("AudioSelectionPage.qml")
+                    stackView.push(audioSelectionPageComponent)
                     drawer.close()
                 }
             }
@@ -69,7 +69,25 @@ ApplicationWindow {
 
     StackView {
         id: stackView
-        initialItem: "HomeForm.ui.qml"
+        initialItem: homePageComponent
         anchors.fill: parent
     }
+
+    Component {
+        id: homePageComponent
+        HomePage {
+            id: homePage
+        }
+    }
+
+
+    Component {
+        id: audioSelectionPageComponent
+        AudioSelectionPage {
+            id: audioSelectionPage
+        }
+    }
+
+
+
 }

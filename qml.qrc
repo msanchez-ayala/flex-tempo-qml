@@ -1,11 +1,12 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>HomeForm.ui.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>components/PlaybackDial.qml</file>
         <file>Constants.js</file>
         <file>AudioSelectionPage.qml</file>
         <file>components/FileHistoryModel.qml</file>
+        <file>components/main copy.qml</file>
+        <file>HomePage.qml</file>
     </qresource>
 </RCC>

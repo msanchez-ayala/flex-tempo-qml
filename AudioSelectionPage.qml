@@ -8,9 +8,6 @@ import 'components'
 
 Page {
     id: audioSelectionPage
-    width: 600
-    height: 400
-    anchors.centerIn: parent
 
     title: qsTr("Audio Selection")
 
