@@ -73,6 +73,8 @@ ApplicationWindow {
         anchors.fill: parent
     }
 
+    // Put these inside components so that they don't show by defualt
+
     Component {
         id: homePageComponent
         HomePage {

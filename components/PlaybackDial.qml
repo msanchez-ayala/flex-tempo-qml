@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls.Material
 
 Item {
     id: playbackDial
@@ -13,11 +14,25 @@ Item {
         RateEnd
     }
 
+    QtObject {
+        id: colors
+        readonly property color baseArc: Material.color(Material.Grey, Material.Shade300)
+        readonly property color playbackArc: Material.color(Material.Indigo, Material.Shade300)
+        readonly property color playbackHandle: Material.color(Material.Indigo, Material.Shade700)
+        readonly property color loopArc: Material.color(Material.Green, Material.Shade300)
+        readonly property color loopHandle: Material.color(Material.Green, Material.Shade700)
+        readonly property color rateArc: Material.color(Material.Orange, Material.Shade200)
+        readonly property color rateHandle: Material.color(Material.Orange, Material.Shade700)
+    }
+
+
+
     property real playbackFraction: 0
     property real loopStartFraction: 0
     property real loopEndFraction: 0
     property real playbackRateFraction: 0
 
+    readonly property real twoPi: 2 * Math.PI
     readonly property int canvasMargin: 40
     readonly property int arcLineWidth: 40
     readonly property var loopHandles: [PlaybackDial.HandleTypes.LoopStart, PlaybackDial.HandleTypes.LoopEnd]
@@ -76,41 +91,16 @@ Item {
         onPaint: {
             var ctx = getContext("2d")
             ctx.reset()
-            drawBaseArc(ctx)
-            drawPlaybackArc(ctx)
-            drawLoopArc(ctx)
-            drawRateArc(ctx)
-            drawHandle(ctx, '#9168EB', PlaybackDial.HandleTypes.PlaybackStart)
-            drawHandle(ctx, '#684795', PlaybackDial.HandleTypes.PlaybackEnd)
-            drawLoopHandles(ctx)
-            drawHandle(ctx, '#B9E8C3', PlaybackDial.HandleTypes.RateStart)
-            drawHandle(ctx, '#92BE9B', PlaybackDial.HandleTypes.RateEnd)
-        }
-
-        function drawBaseArc(ctx) {
-            const start = 0
-            const end = 2 * Math.PI
-            const radius = baseArcRadius
-            const color = '#E2E2E2'
-            drawArc(ctx, start, end, radius, color)
-        }
-
-        function drawLoopArc(ctx) {
-            const radius = loopArcRadius
-            const color = '#DAADE8'
-            drawArc(ctx, loopStart, loopEnd, radius, color)
-        }
-
-        function drawPlaybackArc(ctx) {
-            const radius = baseArcRadius
-            const color = '#9168EB'
-            drawArc(ctx, playbackStart, playbackEnd, radius, color)
-        }
-
-        function drawRateArc(ctx) {
-            const radius = rateArcRadius
-            const color = '#B9E8C3'
-            drawArc(ctx, rateStart, rateEnd, radius, color)
+            drawArc(ctx, playbackStart, twoPi, baseArcRadius, colors.baseArc)
+            drawArc(ctx, playbackStart, playbackEnd, baseArcRadius, colors.playbackArc)
+            drawArc(ctx, loopStart, loopEnd, loopArcRadius, colors.loopArc)
+            drawArc(ctx, rateStart, rateEnd, rateArcRadius, colors.rateArc)
+            drawHandle(ctx, colors.playbackArc, PlaybackDial.HandleTypes.PlaybackStart)
+            drawHandle(ctx, colors.playbackHandle, PlaybackDial.HandleTypes.PlaybackEnd)
+            drawHandle(ctx, colors.loopHandle, PlaybackDial.HandleTypes.LoopStart)
+            drawHandle(ctx, colors.loopHandle, PlaybackDial.HandleTypes.LoopEnd)
+            drawHandle(ctx, colors.rateArc, PlaybackDial.HandleTypes.RateStart)
+            drawHandle(ctx, colors.rateHandle, PlaybackDial.HandleTypes.RateEnd)
         }
 
         function drawArc(ctx, start, end, radius, color) {
@@ -150,12 +140,6 @@ Item {
 
         function loopHandlesAreOverlapping() {
             return Math.abs(loopEnd - loopStart) < 0.25
-        }
-
-        // Only draw the end handle if the two handles begin to overlap
-        function drawLoopHandles(ctx) {
-            drawHandle(ctx, '#BB94C7', PlaybackDial.HandleTypes.LoopStart)
-            drawHandle(ctx, '#BB94C7', PlaybackDial.HandleTypes.LoopEnd)
         }
 
         // Convert the supplied angle to one which the canvas will
