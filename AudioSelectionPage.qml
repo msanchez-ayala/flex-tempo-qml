@@ -7,9 +7,14 @@ import 'components'
 
 
 Page {
-    id: audioSelectionPage
+    id: root
+
+    required property ListModel fileHistoryModel
+
+    signal selectedSongChanged(string newUrl)
 
     title: qsTr("Audio Selection")
+
 
     ColumnLayout {
         id: contentColumn
@@ -19,33 +24,20 @@ Page {
         }
         spacing: 24
 
-        Row {
-            id: importRow
-            height: importButton.height
-            Layout.alignment: Qt.AlignLeft || Qt.AlignVCenter
-            spacing: Constants.Dimensions.margins
-
-            Button {
-                id: importButton
-                text: qsTr("Import audio")
-                onClicked: fileDialog.open()
-            }
-
-            Text {
-                id: currentFileLabel
-                text: 'Select a file'
-                anchors.verticalCenter: parent.verticalCenter
-            }
+        Button {
+            id: importButton
+            Layout.alignment: Qt.AlignHCenter
+            text: qsTr("\u266B")
+            onClicked: fileDialog.open()
         }
 
         Component {
-            id: fileHistoryDelegate
-            Item {
-                width: parent.width; height: 40
-                Text {
-                    text: fileName
-                    anchors.centerIn: parent
-                }
+            id: highlight
+            Rectangle {
+                width: listViewContainer.width; height: 40
+                color: "lightsteelblue"
+                y: fileHistoryListView.currentItem.y
+                Behavior on y { SmoothedAnimation { duration: 160 } }
             }
         }
 
@@ -60,10 +52,19 @@ Page {
 
             ListView {
                 id: fileHistoryListView
-                model: FileHistoryModel{}
                 anchors.fill: parent
 
-                delegate: fileHistoryDelegate
+                model: root.fileHistoryModel
+                delegate: Component {
+                    Item {
+                        width: parent.width; height: 40
+                        Text { text: fileName ;  anchors.centerIn: parent }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: fileHistoryListView.currentIndex = index
+                        }
+                    }
+                }
                 header: Item {
                     id: listViewHeader
                     width: parent.width; height: headerText.height + 2*Constants.Dimensions.margins
@@ -75,6 +76,13 @@ Page {
                     }
                 }
                 headerPositioning: ListView.OverlayHeader
+                highlight: highlight
+
+                onCurrentIndexChanged: {
+                    const data = model.get(currentIndex)
+                    console.log('data url', data.url)
+                    root.selectedSongChanged(data.url)
+                }
 
                 function setCurrentFileUrl(fileUrl) {
                     model.setCurrentFileUrl(fileUrl)
@@ -94,10 +102,5 @@ Page {
 
     }
 
-    function urlToFileName(fileUrl) {
-        const absPath = fileUrl.toString()
-        const relPath = absPath.replace(/^.*[\\\/]/, '')
-        const fileName = relPath.replace(/\.[^/.]+$/, "")
-        return fileName
-    }
+
 }

@@ -54,4 +54,11 @@ ListModel {
         }
         return idx
     }
+
+    function urlToFileName(fileUrl) {
+        const absPath = fileUrl.toString()
+        const relPath = absPath.replace(/^.*[\\\/]/, '')
+        const fileName = relPath.replace(/\.[^/.]+$/, "")
+        return fileName
+    }
 }

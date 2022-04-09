@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtMultimedia
+import "components"
 
 ApplicationWindow {
     id: window
@@ -26,6 +27,12 @@ ApplicationWindow {
         }
     }
 
+    QtObject {
+        id: modelContainer
+
+        property ListModel fileHistoryModel: FileHistoryModel {}
+    }
+
     Drawer {
         id: drawer
         width: window.width * 0.66
@@ -47,6 +54,7 @@ ApplicationWindow {
                 width: parent.width
                 onClicked: {
                     stackView.push(audioSelectionPageComponent)
+                    console.log(modelContainer.fileHistoryModel.rowCount())
                     drawer.close()
                 }
             }
@@ -88,12 +96,18 @@ ApplicationWindow {
 
         AudioSelectionPage {
             id: audioSelectionPage
+            fileHistoryModel: modelContainer.fileHistoryModel
+            onSelectedSongChanged: (newUrl) => {
+                if (newUrl === mediaPlayer.source) {
+                   return
+               }
+                mediaPlayer.source = newUrl
+            }
         }
     }
 
     MediaPlayer {
         id: mediaPlayer
-        source: 'file:///Users/Marco/Documents/Recordings/Corey F./East of the Sun.mp3'
         audioOutput: AudioOutput {}
 
         property real loopStartPos: 0
