@@ -45,7 +45,7 @@ ApplicationWindow {
                 text: qsTr("Home")
                 width: parent.width
                 onClicked: {
-                    stackView.push(homePageComponent)
+                    stackView.push(homePage)
                     drawer.close()
                 }
             }
@@ -62,30 +62,22 @@ ApplicationWindow {
 
     StackView {
         id: stackView
-        initialItem: homePageComponent
+        initialItem: homePage
         anchors.fill: parent
     }
 
     // Put these inside components so that they don't show by defualt
 
-    Component {
-        id: homePageComponent
+    HomePage {
+        id: homePage
 
-        HomePage {
-            id: homePage
-
-            playbackMax: mediaPlayer.duration
-            playbackPos: mediaPlayer.position
-            ratePos: mediaPlayer.playbackRate
-            rateMax: 2  // Can reevaluate later
-            loopStartPos: mediaPlayer.loopStartPos
-            loopEndPos: mediaPlayer.loopEndPos
-
-            onPlaybackHandleDragged: (newPos) => { mediaPlayer.setPosition(newPos) }
-            onRateHandleDragged: (newPos) => { mediaPlayer.setPlaybackRate(newPos) }
-            onLoopStartHandleDragged: (newPos) => { mediaPlayer.loopStartPos = newPos }
-            onLoopEndHandleDragged: (newPos) => { mediaPlayer.loopEndPos = newPos }
-        }
+        playbackMax: mediaPlayer.duration
+        playbackPos: mediaPlayer.position
+        ratePos: mediaPlayer.playbackRate
+        rateMax: 2  // Can reevaluate later
+        loopStartPos: mediaPlayer.loopStartPos
+        loopEndPos: mediaPlayer.loopEndPos
+        playing: mediaPlayer.isPlaying
     }
 
 
@@ -104,6 +96,7 @@ ApplicationWindow {
 
         property real loopStartPos: 0
         property real loopEndPos: 0
+        property bool isPlaying: (playbackState === MediaPlayer.PlayingState) ? true : false
 
         onPositionChanged: {
             if (mediaPlayer.position <= loopStartPos || mediaPlayer.position >= loopEndPos) {
@@ -113,12 +106,25 @@ ApplicationWindow {
         Component.onCompleted: {
             durationChanged.connect(updateloopEndPos)
             updateloopEndPos()
+
+            homePage.playbackButtonClicked.connect(togglePlaybackState)
+            homePage.playbackHandleDragged.connect(setPosition)
+            homePage.rateHandleDragged.connect(setPlaybackRate)
+            homePage.loopStartHandleDragged.connect((newPos) => { mediaPlayer.loopStartPos = newPos })
+            homePage.loopEndHandleDragged.connect((newPos) => { mediaPlayer.loopEndPos = newPos })
+        }
+
+        function togglePlaybackState() {
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
+            } else {
+                mediaPlayer.play()
+            }
         }
 
         function updateloopEndPos() {
             loopEndPos = mediaPlayer.duration
         }
-
     }
 
 

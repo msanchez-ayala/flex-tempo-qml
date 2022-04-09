@@ -4,7 +4,7 @@ import "components"
 import "Constants.js" as Constants
 
 Page {
-    id: homePage
+    id: root
 
     // Playback and loop values in ms
     required property real playbackMax
@@ -15,18 +15,24 @@ Page {
     required property real rateMax
     required property real ratePos
 
+    required property bool playing
+
     signal playbackHandleDragged(real newPos)
     signal rateHandleDragged(real newPos)
     signal loopStartHandleDragged(real newPos)
     signal loopEndHandleDragged(real newPos)
+    signal playbackButtonClicked()
+    signal resetButtonClicked()
 
     title: qsTr("Home")
 
     Component.onCompleted: {
-        dial.playbackHandleDragged.connect(homePage.playbackHandleDragged)
-        dial.rateHandleDragged.connect(homePage.rateHandleDragged)
-        dial.loopStartHandleDragged.connect(homePage.loopStartHandleDragged)
-        dial.loopEndHandleDragged.connect(homePage.loopEndHandleDragged)
+        dial.playbackHandleDragged.connect(root.playbackHandleDragged)
+        dial.rateHandleDragged.connect(root.rateHandleDragged)
+        dial.loopStartHandleDragged.connect(root.loopStartHandleDragged)
+        dial.loopEndHandleDragged.connect(root.loopEndHandleDragged)
+        playbackButton.clicked.connect(playbackButtonClicked)
+        resetButton.clicked.connect(resetButtonClicked)
     }
 
     // Time conversions
@@ -59,17 +65,17 @@ Page {
 
         Text {
             id: playbackPosText
-            text: 'Playback: ' + convertMsToTime(homePage.playbackPos) + '/' + convertMsToTime(homePage.playbackMax)
+            text: 'Playback: ' + convertMsToTime(root.playbackPos) + '/' + convertMsToTime(root.playbackMax)
         }
 
         Text {
             id: loopText
-            text: 'Looping: ' + convertMsToTime(homePage.loopStartPos) + '-' + convertMsToTime(homePage.loopEndPos)
+            text: 'Looping: ' + convertMsToTime(root.loopStartPos) + '-' + convertMsToTime(root.loopEndPos)
         }
 
         Text {
             id: rateText
-            text: 'Rate: ' + Math.round(homePage.ratePos * 100).toString() + '%'
+            text: 'Rate: ' + Math.round(root.ratePos * 100).toString() + '%'
         }
     }
 
@@ -79,12 +85,12 @@ Page {
         height: parent.height * 3/4
         width: parent.width * 2/3
 
-        playbackMax: homePage.playbackMax
-        playbackPos: homePage.playbackPos
-        loopStartPos: homePage.loopStartPos
-        loopEndPos: homePage.loopEndPos
-        rateMax: homePage.rateMax
-        ratePos: homePage.ratePos
+        playbackMax: root.playbackMax
+        playbackPos: root.playbackPos
+        loopStartPos: root.loopStartPos
+        loopEndPos: root.loopEndPos
+        rateMax: root.rateMax
+        ratePos: root.ratePos
 
         anchors {
             top: parent.top
@@ -94,7 +100,7 @@ Page {
 
         // Convert a song time into an angle
         function timeToAngle(time) {
-            const fraction = time / homePage.playbackMax
+            const fraction = time / root.playbackMax
             return 2 * Math.PI * fraction
         }
 
@@ -112,21 +118,13 @@ Page {
         }
 
         Button {
-            id: resetBtn
+            id: resetButton
             text: 'Reset'
-            onClicked: console.log('EMIT A RESET SIGNAL')
         }
 
         Button {
-            id: startBtn
-            text: 'Start'
-            onClicked: console.log('EMIT A START SIGNAL')
-        }
-
-        Button {
-            id: pauseBtn
-            text: 'Pause'
-            onClicked: console.log('EMIT A PAUSE SIGNAL')
+            id: playbackButton
+            text: playing ? 'Pause' : 'Start'
         }
     }
 }
