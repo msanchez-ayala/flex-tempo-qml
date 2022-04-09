@@ -8,27 +8,6 @@ ApplicationWindow {
     height: 480
     visible: true
     title: qsTr("Flex Tempo")
-
-    MediaPlayer {
-        id: mediaPlayer
-        source: 'file:///Users/Marco/Documents/Recordings/Corey F./East of the Sun.mp3'
-        audioOutput: AudioOutput {}
-
-        readonly property real defaultStartPosition: 0
-
-        property real loopStartPosition: defaultStartPosition
-        property real loopEndPosition
-
-        onPositionChanged: {
-            if (mediaPlayer.position <= loopStartPosition || mediaPlayer.position >= loopEndPosition) {
-                mediaPlayer.position = loopStartPosition
-            }
-        }
-        onSourceChanged: {
-            loopEndPosition = duration
-        }
-    }
-
     header: ToolBar {
         id: headerToolBar
         contentHeight: toolButton.implicitHeight
@@ -91,29 +70,55 @@ ApplicationWindow {
 
     Component {
         id: homePageComponent
+
         HomePage {
             id: homePage
-            // Figure out a two way mapping without creating a binding loop
-            playbackTotal: mediaPlayer.duration
-            currentTime: mediaPlayer.position
-            playbackRate: mediaPlayer.playbackRate
-            loopStartTime: mediaPlayer.loopStartPosition
-            loopEndTime: mediaPlayer.loopEndPosition
-            onPlaybackHandleDragged: (newPosition) => mediaPlayer.setPosition(newPosition)
-            onRateHandleDragged: (newRate) => mediaPlayer.setPlaybackRate(newRate)
-            onLoopHandleDragged: (newLoopStartPos, newLoopEndPos) => {
-                mediaPlayer.loopStartPosition = newLoopStartPos
-                mediaPlayer.loopEndPosition = newLoopEndPos
-            }
+
+            playbackMax: mediaPlayer.duration
+            playbackPos: mediaPlayer.position
+            ratePos: mediaPlayer.playbackRate
+            rateMax: 2  // Can reevaluate later
+            loopStartPos: mediaPlayer.loopStartPos
+            loopEndPos: mediaPlayer.loopEndPos
+
+            onPlaybackHandleDragged: (newPos) => { console.log('newpos', newPos); mediaPlayer.setPosition(newPos) }
+            onRateHandleDragged: (newPos) => { mediaPlayer.setPlaybackRate(newPos) }
+            onLoopStartHandleDragged: (newPos) => { mediaPlayer.loopStartPos = newPos }
+            onLoopEndHandleDragged: (newPos) => { mediaPlayer.loopEndPos = newPos }
         }
     }
 
 
     Component {
         id: audioSelectionPageComponent
+
         AudioSelectionPage {
             id: audioSelectionPage
         }
+    }
+
+    MediaPlayer {
+        id: mediaPlayer
+        source: 'file:///Users/Marco/Documents/Recordings/Corey F./East of the Sun.mp3'
+        audioOutput: AudioOutput {}
+
+        property real loopStartPos: 0
+        property real loopEndPos: 0
+
+        onPositionChanged: {
+            if (mediaPlayer.position <= loopStartPos || mediaPlayer.position >= loopEndPos) {
+                mediaPlayer.position = loopStartPos
+            }
+        }
+        Component.onCompleted: {
+            durationChanged.connect(updateloopEndPos)
+            updateloopEndPos()
+        }
+
+        function updateloopEndPos() {
+            loopEndPos = mediaPlayer.duration
+        }
+
     }
 
 

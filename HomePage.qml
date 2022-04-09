@@ -6,156 +6,28 @@ import "Constants.js" as Constants
 Page {
     id: homePage
 
+    // Playback and loop values in ms
+    required property real playbackMax
+    required property real playbackPos
+    required property real loopStartPos
+    required property real loopEndPos
+    // Fractional values
+    required property real rateMax
+    required property real ratePos
+
+    signal playbackHandleDragged(real newPos)
+    signal rateHandleDragged(real newPos)
+    signal loopStartHandleDragged(real newPos)
+    signal loopEndHandleDragged(real newPos)
+
     title: qsTr("Home")
 
-    signal playbackHandleDragged(int newPosition)
-    signal rateHandleDragged(real newRate)
-    signal loopHandleDragged(int newLoopStartPos, int newLoopEndPos)
-
-
-    property int playbackTotal: 50000
-    readonly property real rateMaximum: 1
-
-    readonly property int defaultPlaybackRate: 1
-    readonly property int defaultCurrentTime: 0
-    readonly property int defaultLoopStartTime: 0
-    readonly property int defaultLoopEndTime: playbackTotal  // Default to full loop
-
-    property real playbackRate: defaultPlaybackRate
-    property int currentTime: defaultCurrentTime
-    property int loopStartTime: defaultLoopStartTime
-    property int loopEndTime: defaultLoopEndTime
-
-    onCurrentTimeChanged: {
-        if (currentTime <= loopStartTime || currentTime >= loopEndTime) {
-            currentTime = loopStartTime
-        }
+    Component.onCompleted: {
+        dial.playbackHandleDragged.connect(homePage.playbackHandleDragged)
+        dial.rateHandleDragged.connect(homePage.rateHandleDragged)
+        dial.loopStartHandleDragged.connect(homePage.loopStartHandleDragged)
+        dial.loopEndHandleDragged.connect(homePage.loopEndHandleDragged)
     }
-
-
-    Column {
-        id: textColumn
-        anchors {
-            top: parent.top
-            left: parent.left
-            margins: 12
-        }
-
-        spacing: 12
-
-        Text {
-            id: currentTimeText
-            text: 'Playback: ' + convertMsToTime(currentTime) + '/' + convertMsToTime(playbackTotal)
-        }
-
-        Text {
-            id: loopText
-            text: 'Looping: ' + convertMsToTime(loopStartTime) + '-' + convertMsToTime(loopEndTime)
-        }
-
-        Text {
-            id: rateText
-            text: 'Rate: ' + Math.round(playbackRate * 100).toString() + '%'
-        }
-    }
-
-    // These are all required for some reason. Maybe I need to change
-    // the fact that these values are explicitly set elsewhere, which nullifies
-    // any bindings set directly on the object.
-    // Could be that I just need to define fractions on the dial, like for playback
-    onPlaybackRateChanged: {
-        dial.rateEnd = Qt.binding(function() {
-            return (playbackRate / rateMaximum) * (2 * Math.PI)
-        })
-    }
-
-    onLoopEndTimeChanged: {
-        dial.loopEnd = Qt.binding(function() {
-            return dial.timeToAngle(loopEndTime)
-        })
-    }
-
-    onLoopStartTimeChanged: {
-        dial.loopStart = Qt.binding(function() {
-            return dial.timeToAngle(loopStartTime)
-        })
-    }
-
-    PlaybackDial {
-        id: dial
-        height: parent.height * 3/4
-        width: parent.width * 2/3
-
-        anchors {
-            top: parent.top
-            horizontalCenter: parent.horizontalCenter
-            margins: 2 * Constants.Dimensions.margins
-        }
-
-        playbackFraction: currentTime / playbackTotal
-
-        onPlaybackHandleDragged: {
-            const newFraction = dial.playbackEnd / (2* Math.PI)
-            const newPosition = playbackTotal * newFraction
-            homePage.playbackHandleDragged(newPosition)
-        }
-        onRateHandleDragged: {
-            const newFraction = dial.rateEnd / (2* Math.PI)
-            const newRate = rateMaximum * newFraction
-            homePage.rateHandleDragged(newRate)
-        }
-        onLoopHandleDragged: {
-            const startFraction = dial.loopStart / (2*Math.PI)
-            const newLoopStartTime = playbackTotal * startFraction
-
-            const endFraction = dial.loopEnd / (2*Math.PI)
-            const newLoopEndTime = playbackTotal * endFraction
-
-            homePage.loopHandleDragged(newLoopStartTime, newLoopEndTime)
-        }
-
-        // Convert a song time into an angle
-        function timeToAngle(time) {
-            const fraction = time / playbackTotal
-            return 2 * Math.PI * fraction
-        }
-
-    }
-
-    Row {
-        id: buttonRow
-        anchors {
-            top: dial.bottom
-            horizontalCenter: parent.horizontalCenter
-            margins: 2 * Constants.Dimensions.margins
-        }
-        spacing: 12
-
-        Button {
-            id: resetBtn
-            text: 'Reset'
-            onClicked: {
-                timeInterval = defaultTimeInterval
-                playbackRate = defaultPlaybackRate
-                loopStartTime = defaultLoopStartTime
-                loopEndTime = defaultLoopEndTime
-                currentTime = defaultCurrentTime
-            }
-        }
-
-        Button {
-            id: startBtn
-            text: 'Start'
-            onClicked: timer.running = true
-        }
-
-        Button {
-            id: pauseBtn
-            text: 'Pause'
-            onClicked: timer.running = false
-        }
-    }
-
 
     // Time conversions
 
@@ -172,5 +44,89 @@ Page {
 
     function convertMsToSeconds(ms) {
         return Math.floor(ms/1000)
+    }
+
+    // Temporary - need better ux
+    Column {
+        id: textColumn
+        anchors {
+            top: parent.top
+            left: parent.left
+            margins: 12
+        }
+
+        spacing: 12
+
+        Text {
+            id: playbackPosText
+            text: 'Playback: ' + convertMsToTime(homePage.playbackPos) + '/' + convertMsToTime(homePage.playbackMax)
+        }
+
+        Text {
+            id: loopText
+            text: 'Looping: ' + convertMsToTime(homePage.loopStartPos) + '-' + convertMsToTime(homePage.loopEndPos)
+        }
+
+        Text {
+            id: rateText
+            text: 'Rate: ' + Math.round(homePage.ratePos * 100).toString() + '%'
+        }
+    }
+
+    PlaybackDial {
+        id: dial
+
+        height: parent.height * 3/4
+        width: parent.width * 2/3
+
+        playbackMax: homePage.playbackMax
+        playbackPos: homePage.playbackPos
+        loopStartPos: homePage.loopStartPos
+        loopEndPos: homePage.loopEndPos
+        rateMax: homePage.rateMax
+        ratePos: homePage.ratePos
+
+        anchors {
+            top: parent.top
+            horizontalCenter: parent.horizontalCenter
+            margins: 2 * Constants.Dimensions.margins
+        }
+
+        // Convert a song time into an angle
+        function timeToAngle(time) {
+            const fraction = time / homePage.playbackMax
+            return 2 * Math.PI * fraction
+        }
+
+    }
+
+    Row {
+        id: buttonRow
+
+        spacing: 12
+
+        anchors {
+            top: dial.bottom
+            horizontalCenter: parent.horizontalCenter
+            margins: 2 * Constants.Dimensions.margins
+        }
+
+        Button {
+            id: resetBtn
+            text: 'Reset'
+            onClicked: console.log('EMIT A RESET SIGNAL')
+        }
+
+        Button {
+            id: startBtn
+            text: 'Start'
+            onClicked: console.log('EMIT A START SIGNAL')
+        }
+
+        Button {
+            id: pauseBtn
+            text: 'Pause'
+            onClicked: console.log('EMIT A PAUSE SIGNAL')
+        }
     }
 }
