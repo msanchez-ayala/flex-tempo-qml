@@ -1,30 +1,46 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtMultimedia
 import "components"
+import "Constants.js" as Constants
 
 ApplicationWindow {
     id: window
-    width: 640
-    height: 480
+    width: 360
+    height: 640
     visible: true
     title: qsTr("Flex Tempo")
     header: ToolBar {
         id: headerToolBar
         contentHeight: toolButton.implicitHeight
 
-        ToolButton {
-            id: toolButton
-            text: stackView.depth > 1 ? "\u25C0" : "\u2630"
-            font.pixelSize: Qt.application.font.pixelSize * 1.6
-            onClicked: {
-                if (stackView.depth > 1) {
-                    stackView.pop()
-                } else {
-                    drawer.open()
+        Row {
+            anchors.fill: parent
+//            spacing: Constants.Dimensions.margins
+
+            ToolButton {
+                id: toolButton
+                text: stackView.depth > 1 ? "\u25C0" : "\u2630"
+                font.pixelSize: Qt.application.font.pixelSize * 1.6
+                onClicked: {
+                    if (stackView.depth > 1) {
+                        stackView.pop()
+                    } else {
+                        drawer.open()
+                    }
                 }
             }
+
+            ToolButton {
+                id: importButton
+                text: qsTr("\u266B")
+                font.pixelSize: Qt.application.font.pixelSize * 1.6
+                onClicked: fileDialog.open()
+            }
         }
+
+
     }
 
     QtObject {
@@ -54,7 +70,6 @@ ApplicationWindow {
                 width: parent.width
                 onClicked: {
                     stackView.push(audioSelectionPageComponent)
-                    console.log(modelContainer.fileHistoryModel.rowCount())
                     drawer.close()
                 }
             }
@@ -87,6 +102,7 @@ ApplicationWindow {
         rateMax: 2  // Can reevaluate later
         loopStartPos: mediaPlayer.loopStartPos
         loopEndPos: mediaPlayer.loopEndPos
+        currentSongName: mediaPlayer.currentSongName
         playing: mediaPlayer.isPlaying
     }
 
@@ -97,12 +113,6 @@ ApplicationWindow {
         AudioSelectionPage {
             id: audioSelectionPage
             fileHistoryModel: modelContainer.fileHistoryModel
-            onSelectedSongChanged: (newUrl) => {
-                if (newUrl === mediaPlayer.source) {
-                   return
-               }
-                mediaPlayer.source = newUrl
-            }
         }
     }
 
@@ -113,6 +123,7 @@ ApplicationWindow {
         property real loopStartPos: 0
         property real loopEndPos: 0
         property bool isPlaying: (playbackState === MediaPlayer.PlayingState) ? true : false
+        property string currentSongName: ''
 
         onPositionChanged: {
             if (mediaPlayer.position <= loopStartPos || mediaPlayer.position >= loopEndPos) {
@@ -130,6 +141,13 @@ ApplicationWindow {
             homePage.rateHandleDragged.connect(setPlaybackRate)
             homePage.loopStartHandleDragged.connect((newPos) => { mediaPlayer.loopStartPos = newPos })
             homePage.loopEndHandleDragged.connect((newPos) => { mediaPlayer.loopEndPos = newPos })
+        }
+
+        function updateSource(newSource) {
+            if (newSource === mediaPlayer.source) {
+               return
+            }
+            mediaPlayer.source = newSource
         }
 
         function togglePlaybackState() {
@@ -150,6 +168,21 @@ ApplicationWindow {
 
         function updateloopEndPos() {
             loopEndPos = mediaPlayer.duration
+        }
+    }
+
+    FileDialog {
+        id: fileDialog
+        fileMode: FileDialog.OpenFile
+        options: FileDialog.ReadOnly
+        nameFilters: ['Audio files (*.mp3 *.wav)']
+        selectedNameFilter.index: 0
+        onAccepted: {
+            mediaPlayer.updateSource(currentFile)
+            modelContainer.fileHistoryModel.setCurrentFileUrl(currentFile)
+            // setCurrentFileUrl ensures we always have this index for a selected song
+            const data = modelContainer.fileHistoryModel.get(0)
+            mediaPlayer.currentSongName = data.fileName
         }
     }
 

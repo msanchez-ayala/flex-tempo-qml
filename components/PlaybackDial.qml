@@ -43,12 +43,12 @@ Item {
     onLoopEndPosChanged: canvas.requestPaint()
     onRatePosChanged: canvas.requestPaint()
 
-    //    Rectangle {
-    //        id: debugRect
-    //        anchors.fill: root
-    //        color: 'transparent'
-    //        border.color: 'red'
-    //    }
+//    Rectangle {
+//        id: debugRect
+//        anchors.fill: root
+//        color: 'transparent'
+//        border.color: 'red'
+//    }
 
     Canvas {
         id: canvas
@@ -57,8 +57,8 @@ Item {
 
         QtObject {
             id: geometry
-            readonly property real centerX: width/2
-            readonly property real centerY: height/2
+            readonly property real centerX: root.width/2
+            readonly property real centerY: root.height/2
             readonly property int arcLineWidth: 40
             readonly property real playbackArcRadius: (Math.min(width, height) - arcLineWidth)/2
             readonly property real loopArcRadius: playbackArcRadius - arcLineWidth
@@ -91,22 +91,27 @@ Item {
             readonly property color rateHandle: Material.color(Material.Orange, Material.Shade700)
         }
 
-        width: root.width
-        height: Math.min(width, root.height)
-        anchors.centerIn: parent
+        anchors.fill: parent
 
         onPaint: {
             var ctx = getContext("2d")
             ctx.reset()
+
+            // Background arcs
             drawArc(ctx, angles.playbackStart, Constants.Numbers.twoPi, geometry.playbackArcRadius, colors.playbackArcBg)
-            drawArc(ctx, angles.playbackStart, angles.playbackEnd, geometry.playbackArcRadius, colors.playbackArc)
-
             drawArc(ctx, angles.playbackStart, Constants.Numbers.twoPi, geometry.loopArcRadius, colors.loopArcBg)
-            drawArc(ctx, angles.loopStart, angles.loopEnd, geometry.loopArcRadius, colors.loopArc)
-
             drawArc(ctx, angles.rateStart, Constants.Numbers.twoPi, geometry.rateArcRadius, colors.rateArcBg)
+
+            if ([angles.playbackEnd, angles.loopStart, angles.loopEnd, angles.rateEnd].some(isNaN)) {
+                return
+            }
+
+            // Filled arcs
+            drawArc(ctx, angles.playbackStart, angles.playbackEnd, geometry.playbackArcRadius, colors.playbackArc)
+            drawArc(ctx, angles.loopStart, angles.loopEnd, geometry.loopArcRadius, colors.loopArc)
             drawArc(ctx, angles.rateStart, angles.rateEnd, geometry.rateArcRadius, colors.rateArc)
 
+            // Handles
             drawHandle(ctx, colors.playbackArc, PlaybackDial.HandleTypes.PlaybackStart)
             drawHandle(ctx, colors.playbackHandle, PlaybackDial.HandleTypes.PlaybackEnd)
 
@@ -294,13 +299,15 @@ Item {
 
         MouseArea {
             id: canvasMouseArea
-            anchors.fill: parent
+            anchors.fill: canvas
             enabled: true
             onReleased: canvas.removeActiveHandle()
             onExited: canvas.removeActiveHandle()
             onMouseXChanged: parent.processMouseDrag()
             onMouseYChanged: parent.processMouseDrag()
         }
+
+
 
     }
 

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import "components"
 import "Constants.js" as Constants
 
@@ -15,6 +16,7 @@ Page {
     required property real rateMax
     required property real ratePos
 
+    required property string currentSongName
     required property bool playing
 
     signal playbackHandleDragged(real newPos)
@@ -39,7 +41,7 @@ Page {
 
     function convertMsToTime(ms) {
         var seconds = convertMsToSeconds(ms)
-        return pad(Math.floor(seconds / 60)) + ":" + pad(Math.floor(seconds % 60))
+        return Math.floor(seconds / 60) + ":" + pad(Math.floor(seconds % 60))
     }
 
     function pad(number) {
@@ -52,79 +54,99 @@ Page {
         return Math.floor(ms/1000)
     }
 
-    // Temporary - need better ux
-    Column {
-        id: textColumn
-        anchors {
-            top: parent.top
-            left: parent.left
-            margins: 12
-        }
 
-        spacing: 12
+//    // Temporary - need better ux
+//    Column {
+//        id: textColumn
+//        anchors {
+//            top: parent.top
+//            left: parent.left
+//            margins: 12
+//        }
 
-        Text {
-            id: playbackPosText
-            text: 'Playback: ' + convertMsToTime(root.playbackPos) + '/' + convertMsToTime(root.playbackMax)
-        }
+//        spacing: 12
 
-        Text {
-            id: loopText
-            text: 'Looping: ' + convertMsToTime(root.loopStartPos) + '-' + convertMsToTime(root.loopEndPos)
-        }
+//        Text {
+//            id: playbackPosText
+//            text: 'Playback: ' + convertMsToTime(root.playbackPos) + '/' + convertMsToTime(root.playbackMax)
+//        }
 
-        Text {
-            id: rateText
-            text: 'Rate: ' + Math.round(root.ratePos * 100).toString() + '%'
-        }
-    }
+//        Text {
+//            id: loopText
+//            text: 'Looping: ' + convertMsToTime(root.loopStartPos) + '-' + convertMsToTime(root.loopEndPos)
+//        }
 
-    PlaybackDial {
-        id: dial
+    //        Text {
+//            id: rateText
+//            text: 'Rate: ' + Math.round(root.ratePos * 100).toString() + '%'
+//        }
+//    }
 
-        height: parent.height * 3/4
-        width: parent.width * 2/3
-
-        playbackMax: root.playbackMax
-        playbackPos: root.playbackPos
-        loopStartPos: root.loopStartPos
-        loopEndPos: root.loopEndPos
-        rateMax: root.rateMax
-        ratePos: root.ratePos
+    ColumnLayout  {
 
         anchors {
-            top: parent.top
-            horizontalCenter: parent.horizontalCenter
-            margins: 2 * Constants.Dimensions.margins
+            fill: parent
+            margins: Constants.Dimensions.margins
         }
 
-        // Convert a song time into an angle
-        function timeToAngle(time) {
-            const fraction = time / root.playbackMax
-            return 2 * Math.PI * fraction
+        Text {
+            id: songNameText
+
+            text: (currentSongName === '') ? 'Select a song' : currentSongName
+            color: (currentSongName === '') ? 'gray' : 'black'
+            Layout.alignment: Qt.AlignHCenter
+            font.pixelSize: Qt.application.font.pixelSize * 1.6
+
+        }
+
+        Text {
+            id: playbackTimeText
+
+            text: {
+                if (currentSongName === '') {
+                    return ''
+                }
+                const curTime = convertMsToTime(root.playbackPos)
+                const maxTime = convertMsToTime(root.playbackMax)
+                return curTime + ' / ' + maxTime
+            }
+            Layout.alignment: Qt.AlignHCenter
+            font.pixelSize: Qt.application.font.pixelSize * 1.2
+
+        }
+
+        PlaybackDial {
+            id: dial
+
+            implicitHeight: Math.max(parent.height / 2, parent.width - (2 * Constants.Dimensions.margins))
+            implicitWidth: implicitHeight
+            Layout.alignment: Qt.AlignHCenter
+
+            playbackMax: root.playbackMax
+            playbackPos: root.playbackPos
+            loopStartPos: root.loopStartPos
+            loopEndPos: root.loopEndPos
+            rateMax: root.rateMax
+            ratePos: root.ratePos
+        }
+
+        Row {
+            id: buttonRow
+
+            spacing: Constants.Dimensions.margins
+            Layout.alignment: Qt.AlignHCenter
+
+            Button {
+                id: resetButton
+                text: 'Reset'
+            }
+
+            Button {
+                id: playbackButton
+                text: playing ? 'Pause' : 'Play'
+            }
         }
 
     }
 
-    Row {
-        id: buttonRow
-
-        spacing: 12
-
-        anchors {
-            top: dial.bottom
-            horizontalCenter: parent.horizontalCenter
-            margins: 2 * Constants.Dimensions.margins
-        }
-
-        Button {
-            id: resetButton
-            text: 'Reset'
-        }
-
-        Button {
-            id: playbackButton
-            text: playing ? 'Pause' : 'Play'
-        }
-    }
 }

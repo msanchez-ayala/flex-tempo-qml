@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import "Constants.js" as Constants
 import 'components'
@@ -23,13 +22,6 @@ Page {
             margins: Constants.Dimensions.margins
         }
         spacing: 24
-
-        Button {
-            id: importButton
-            Layout.alignment: Qt.AlignHCenter
-            text: qsTr("\u266B")
-            onClicked: fileDialog.open()
-        }
 
         Component {
             id: highlight
@@ -80,7 +72,6 @@ Page {
 
                 onCurrentIndexChanged: {
                     const data = model.get(currentIndex)
-                    console.log('data url', data.url)
                     root.selectedSongChanged(data.url)
                 }
 
@@ -90,16 +81,6 @@ Page {
             }
 
         }
-    }
-
-    FileDialog {
-        id: fileDialog
-        fileMode: FileDialog.OpenFile
-        options: FileDialog.ReadOnly
-        nameFilters: ['Audio files (*.mp3 *.wav)']
-        selectedNameFilter.index: 0
-        onAccepted: fileHistoryListView.setCurrentFileUrl(currentFile)
-
     }
 
 
