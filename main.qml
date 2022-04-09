@@ -148,6 +148,7 @@ ApplicationWindow {
                return
             }
             mediaPlayer.source = newSource
+            reset()
         }
 
         function togglePlaybackState() {

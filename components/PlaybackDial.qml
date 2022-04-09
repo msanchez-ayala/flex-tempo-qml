@@ -59,11 +59,16 @@ Item {
             id: geometry
             readonly property real centerX: root.width/2
             readonly property real centerY: root.height/2
-            readonly property int arcLineWidth: 40
+            readonly property int arcLineWidth: 0.13 * Math.min(root.width, root.height)
             readonly property real playbackArcRadius: (Math.min(width, height) - arcLineWidth)/2
             readonly property real loopArcRadius: playbackArcRadius - arcLineWidth
             readonly property real rateArcRadius: loopArcRadius - arcLineWidth
             readonly property real handleArcRadius: arcLineWidth/2
+        }
+
+        Component.onCompleted: {
+            console.log('width', root.width)
+            console.log('acrLlineWidth', geometry.arcLineWidth)
         }
 
         QtObject {

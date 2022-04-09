@@ -54,34 +54,6 @@ Page {
         return Math.floor(ms/1000)
     }
 
-
-//    // Temporary - need better ux
-//    Column {
-//        id: textColumn
-//        anchors {
-//            top: parent.top
-//            left: parent.left
-//            margins: 12
-//        }
-
-//        spacing: 12
-
-//        Text {
-//            id: playbackPosText
-//            text: 'Playback: ' + convertMsToTime(root.playbackPos) + '/' + convertMsToTime(root.playbackMax)
-//        }
-
-//        Text {
-//            id: loopText
-//            text: 'Looping: ' + convertMsToTime(root.loopStartPos) + '-' + convertMsToTime(root.loopEndPos)
-//        }
-
-    //        Text {
-//            id: rateText
-//            text: 'Rate: ' + Math.round(root.ratePos * 100).toString() + '%'
-//        }
-//    }
-
     ColumnLayout  {
 
         anchors {
@@ -96,7 +68,6 @@ Page {
             color: (currentSongName === '') ? 'gray' : 'black'
             Layout.alignment: Qt.AlignHCenter
             font.pixelSize: Qt.application.font.pixelSize * 1.6
-
         }
 
         Text {
@@ -110,15 +81,44 @@ Page {
                 const maxTime = convertMsToTime(root.playbackMax)
                 return curTime + ' / ' + maxTime
             }
-            Layout.alignment: Qt.AlignHCenter
+            Layout.alignment: Qt.AlignLeft
             font.pixelSize: Qt.application.font.pixelSize * 1.2
 
+        }
+
+        Text {
+            id: loopTimeText
+
+            text: {
+                if (currentSongName === '') {
+                    return ''
+                }
+                const startTime = convertMsToTime(root.loopStartPos)
+                const endTime = convertMsToTime(root.loopEndPos)
+                return 'Looping '+ startTime + ' - ' + endTime
+            }
+            Layout.alignment: Qt.AlignLeft
+            font.pixelSize: Qt.application.font.pixelSize * 1.2
+
+        }
+
+        Text {
+            id: playbackRateText
+
+            text: {
+                if (currentSongName === '') {
+                    return ''
+                }
+                return 'Speed: ' + Math.round(root.ratePos * 100).toString() + '%'
+            }
+            Layout.alignment: Qt.AlignLeft
+            font.pixelSize: Qt.application.font.pixelSize * 1.2
         }
 
         PlaybackDial {
             id: dial
 
-            implicitHeight: Math.max(parent.height / 2, parent.width - (2 * Constants.Dimensions.margins))
+            implicitHeight: Math.min(parent.height * 2/3, parent.width - (2 * Constants.Dimensions.margins))
             implicitWidth: implicitHeight
             Layout.alignment: Qt.AlignHCenter
 
