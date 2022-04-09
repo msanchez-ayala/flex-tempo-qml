@@ -1,23 +1,26 @@
 import QtQuick
 import QtQuick.Controls
 import "components"
+import "Constants.js" as Constants
 
 Page {
     id: homePage
 
     title: qsTr("Home")
 
+    signal playbackHandleDragged(int newPosition)
+    signal rateHandleDragged(real newRate)
+    signal loopHandleDragged(int newLoopStartPos, int newLoopEndPos)
 
-    readonly property int playbackTotal: 50000
+
+    property int playbackTotal: 50000
     readonly property real rateMaximum: 1
 
-    readonly property int defaultTimeInterval: 20
     readonly property int defaultPlaybackRate: 1
     readonly property int defaultCurrentTime: 0
     readonly property int defaultLoopStartTime: 0
     readonly property int defaultLoopEndTime: playbackTotal  // Default to full loop
 
-    property real timeInterval: defaultTimeInterval
     property real playbackRate: defaultPlaybackRate
     property int currentTime: defaultCurrentTime
     property int loopStartTime: defaultLoopStartTime
@@ -26,18 +29,6 @@ Page {
     onCurrentTimeChanged: {
         if (currentTime <= loopStartTime || currentTime >= loopEndTime) {
             currentTime = loopStartTime
-        }
-    }
-
-    Timer {
-        id: timer
-        interval: defaultTimeInterval; running: false; repeat: true
-        onTriggered: {
-            if (currentTime + timeInterval > playbackTotal) {
-                currentTime = playbackTotal - currentTime + timeInterval
-            } else {
-                currentTime += timeInterval
-            }
         }
     }
 
@@ -92,24 +83,35 @@ Page {
 
     PlaybackDial {
         id: dial
-        anchors.fill: parent
+        height: parent.height * 3/4
+        width: parent.width * 2/3
+
+        anchors {
+            top: parent.top
+            horizontalCenter: parent.horizontalCenter
+            margins: 2 * Constants.Dimensions.margins
+        }
+
         playbackFraction: currentTime / playbackTotal
 
         onPlaybackHandleDragged: {
             const newFraction = dial.playbackEnd / (2* Math.PI)
-            currentTime = playbackTotal * newFraction
+            const newPosition = playbackTotal * newFraction
+            homePage.playbackHandleDragged(newPosition)
         }
         onRateHandleDragged: {
             const newFraction = dial.rateEnd / (2* Math.PI)
-            playbackRate = rateMaximum * newFraction
-            timeInterval = playbackRate * defaultTimeInterval
+            const newRate = rateMaximum * newFraction
+            homePage.rateHandleDragged(newRate)
         }
         onLoopHandleDragged: {
             const startFraction = dial.loopStart / (2*Math.PI)
-            loopStartTime = playbackTotal * startFraction
+            const newLoopStartTime = playbackTotal * startFraction
 
             const endFraction = dial.loopEnd / (2*Math.PI)
-            loopEndTime = playbackTotal * endFraction
+            const newLoopEndTime = playbackTotal * endFraction
+
+            homePage.loopHandleDragged(newLoopStartTime, newLoopEndTime)
         }
 
         // Convert a song time into an angle
@@ -125,6 +127,7 @@ Page {
         anchors {
             top: dial.bottom
             horizontalCenter: parent.horizontalCenter
+            margins: 2 * Constants.Dimensions.margins
         }
         spacing: 12
 

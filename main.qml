@@ -13,6 +13,20 @@ ApplicationWindow {
         id: mediaPlayer
         source: 'file:///Users/Marco/Documents/Recordings/Corey F./East of the Sun.mp3'
         audioOutput: AudioOutput {}
+
+        readonly property real defaultStartPosition: 0
+
+        property real loopStartPosition: defaultStartPosition
+        property real loopEndPosition
+
+        onPositionChanged: {
+            if (mediaPlayer.position <= loopStartPosition || mediaPlayer.position >= loopEndPosition) {
+                mediaPlayer.position = loopStartPosition
+            }
+        }
+        onSourceChanged: {
+            loopEndPosition = duration
+        }
     }
 
     header: ToolBar {
@@ -79,6 +93,18 @@ ApplicationWindow {
         id: homePageComponent
         HomePage {
             id: homePage
+            // Figure out a two way mapping without creating a binding loop
+            playbackTotal: mediaPlayer.duration
+            currentTime: mediaPlayer.position
+            playbackRate: mediaPlayer.playbackRate
+            loopStartTime: mediaPlayer.loopStartPosition
+            loopEndTime: mediaPlayer.loopEndPosition
+            onPlaybackHandleDragged: (newPosition) => mediaPlayer.setPosition(newPosition)
+            onRateHandleDragged: (newRate) => mediaPlayer.setPlaybackRate(newRate)
+            onLoopHandleDragged: (newLoopStartPos, newLoopEndPos) => {
+                mediaPlayer.loopStartPosition = newLoopStartPos
+                mediaPlayer.loopEndPosition = newLoopEndPos
+            }
         }
     }
 

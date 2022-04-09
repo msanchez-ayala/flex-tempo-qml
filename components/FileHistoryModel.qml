@@ -1,9 +1,8 @@
 import QtQuick
 
+// ListModel {url: <url>, fileName: <fileName>}
 ListModel {
     id: fileHistoryModel
-
-    // keys are url and fileName
 
     // Set the given file URL to the top of the list. If
     // it's already in the model, then just move it to the

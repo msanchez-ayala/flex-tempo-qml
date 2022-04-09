@@ -1,8 +1,19 @@
 import QtQuick
 import QtQuick.Controls.Material
+import "../Constants.js" as Constants
+
 
 Item {
     id: playbackDial
+
+//    // Playback and loop values in ms
+//    required property real playbackMax
+//    required property real playbackPos
+//    required property real loopStartPos
+//    required property real loopEndPos
+//    // Fractional value
+//    required property real rateMax
+//    required property real ratePos
 
     enum HandleTypes {
         None,
@@ -14,6 +25,7 @@ Item {
         RateEnd
     }
 
+    // Encapsulate private properties in QObjects
     QtObject {
         id: colors
         readonly property color baseArc: Material.color(Material.Grey, Material.Shade300)
@@ -24,18 +36,11 @@ Item {
         readonly property color rateArc: Material.color(Material.Orange, Material.Shade200)
         readonly property color rateHandle: Material.color(Material.Orange, Material.Shade700)
     }
-
-
-
     property real playbackFraction: 0
     property real loopStartFraction: 0
     property real loopEndFraction: 0
     property real playbackRateFraction: 0
 
-    readonly property real twoPi: 2 * Math.PI
-    readonly property int canvasMargin: 40
-    readonly property int arcLineWidth: 40
-    readonly property var loopHandles: [PlaybackDial.HandleTypes.LoopStart, PlaybackDial.HandleTypes.LoopEnd]
     readonly property int defaultActiveHandle: PlaybackDial.HandleTypes.None
     property int activeHandle: defaultActiveHandle
 
@@ -46,13 +51,11 @@ Item {
     property real loopEnd
     property real rateEnd
 
-
-
     signal playbackHandleDragged
     signal rateHandleDragged
     signal loopHandleDragged // Either loop handle is dragged by user
 
-    onPlaybackFractionChanged: playbackEnd = playbackFraction * 2 * Math.PI
+    onPlaybackFractionChanged: playbackEnd = playbackFraction * Constants.Numbers.twoPi
     onPlaybackEndChanged: canvas.requestPaint()
     onLoopStartChanged: canvas.requestPaint()
     onLoopEndChanged: canvas.requestPaint()
@@ -60,41 +63,49 @@ Item {
 
     function incrementValue(value) {
         const rads = Math.PI / 4
-        if (value >= 2 * Math.PI) {
+        if (value >= Constants.Numbers.twoPi) {
             return rads
         } else {
             return value += rads
         }
     }
-    Rectangle {
-        anchors.fill: playbackDial
-        color: 'transparent'
-        border.color: 'red'
-    }
+//    Rectangle {
+//        id: debugRect
+//        anchors.fill: playbackDial
+//        color: 'transparent'
+//        border.color: 'red'
+//    }
 
 
     Canvas {
         id: canvas
-        width: playbackDial.width - (2 * playbackDial.canvasMargin)
-        height: Math.min(width, playbackDial.height - (2 * playbackDial.canvasMargin))
+        width: playbackDial.width
+        height: Math.min(width, playbackDial.height)
         anchors.centerIn: parent
 
-        readonly property real centerX: width/2
-        readonly property real centerY: height/2
-        readonly property real baseArcRadius: (Math.min(width, height) - arcLineWidth)/2
-        readonly property real loopArcRadius: baseArcRadius - arcLineWidth
-        readonly property real rateArcRadius: loopArcRadius - arcLineWidth
-        readonly property real handleArcRadius: arcLineWidth/2
+        QtObject {
+            id: canvasConsts
+            readonly property real centerX: width/2
+            readonly property real centerY: height/2
+            readonly property int arcLineWidth: 40
+            readonly property real baseArcRadius: (Math.min(width, height) - arcLineWidth)/2
+            readonly property real loopArcRadius: baseArcRadius - arcLineWidth
+            readonly property real rateArcRadius: loopArcRadius - arcLineWidth
+            readonly property real handleArcRadius: arcLineWidth/2
+        }
+
+
+
 
 
 
         onPaint: {
             var ctx = getContext("2d")
             ctx.reset()
-            drawArc(ctx, playbackStart, twoPi, baseArcRadius, colors.baseArc)
-            drawArc(ctx, playbackStart, playbackEnd, baseArcRadius, colors.playbackArc)
-            drawArc(ctx, loopStart, loopEnd, loopArcRadius, colors.loopArc)
-            drawArc(ctx, rateStart, rateEnd, rateArcRadius, colors.rateArc)
+            drawArc(ctx, playbackStart, Constants.Numbers.twoPi, canvasConsts.baseArcRadius, colors.baseArc)
+            drawArc(ctx, playbackStart, playbackEnd, canvasConsts.baseArcRadius, colors.playbackArc)
+            drawArc(ctx, loopStart, loopEnd, canvasConsts.loopArcRadius, colors.loopArc)
+            drawArc(ctx, rateStart, rateEnd, canvasConsts.rateArcRadius, colors.rateArc)
             drawHandle(ctx, colors.playbackArc, PlaybackDial.HandleTypes.PlaybackStart)
             drawHandle(ctx, colors.playbackHandle, PlaybackDial.HandleTypes.PlaybackEnd)
             drawHandle(ctx, colors.loopHandle, PlaybackDial.HandleTypes.LoopStart)
@@ -107,12 +118,12 @@ Item {
             const startAngle = toCanvasAngle(start)
             const endAngle = toCanvasAngle(end)
             ctx.beginPath();
-            ctx.arc(centerX,
-                    centerY,
+            ctx.arc(canvasConsts.centerX,
+                    canvasConsts.centerY,
                     radius,
                     startAngle,
                     endAngle)
-            ctx.lineWidth = arcLineWidth
+            ctx.lineWidth = canvasConsts.arcLineWidth
             ctx.strokeStyle = color
             ctx.stroke()
         }
@@ -122,13 +133,9 @@ Item {
             const pos = getHandlePosition(handleType)
             const text = getHandleText(handleType)
             const startAngle = toCanvasAngle(0)
-            const endAngle = toCanvasAngle(2*Math.PI)
+            const endAngle = toCanvasAngle(Constants.Numbers.twoPi)
             ctx.beginPath();
-            ctx.arc(pos.x,
-                    pos.y,
-                    handleArcRadius,
-                    startAngle,
-                    endAngle)
+            ctx.arc(pos.x, pos.y, canvasConsts.handleArcRadius, startAngle, endAngle)
             ctx.fillStyle = color
             ctx.fill()
             ctx.fillStyle = '#ffffff'
@@ -203,12 +210,14 @@ Item {
                        PlaybackDial.HandleTypes.LoopStart,
                        PlaybackDial.HandleTypes.RateEnd]
             for (const handleType of draggableHandles) {
-                 const handlePos = getHandlePosition(handleType)
-                 const xIsAcceptable = (point.x < handlePos.x + handleArcRadius && point.x > handlePos.x - handleArcRadius)
-                 const yIsAcceptable = (point.y < handlePos.y + handleArcRadius && point.y > handlePos.y - handleArcRadius)
-                 if (xIsAcceptable && yIsAcceptable) {
-                     clickedHandles.push(handleType)
-                 }
+
+                const handlePos = getHandlePosition(handleType)
+                const radius = canvasConsts.handleArcRadius
+                const xIsAcceptable = (point.x < handlePos.x + radius && point.x > handlePos.x - radius)
+                const yIsAcceptable = (point.y < handlePos.y + radius && point.y > handlePos.y - radius)
+                if (xIsAcceptable && yIsAcceptable) {
+                    clickedHandles.push(handleType)
+                }
             }
             return clickedHandles
         }
@@ -217,27 +226,27 @@ Item {
             var angle
             var radius
             if (handleType === PlaybackDial.HandleTypes.PlaybackStart) {
-                radius = baseArcRadius
+                radius = canvasConsts.baseArcRadius
                 angle = playbackStart
             } else if (handleType === PlaybackDial.HandleTypes.PlaybackEnd) {
-                radius = baseArcRadius
+                radius = canvasConsts.baseArcRadius
                 angle = playbackEnd
             } else if (handleType === PlaybackDial.HandleTypes.LoopStart) {
-                radius = loopArcRadius
+                radius = canvasConsts.loopArcRadius
                 angle = loopStart
             } else if (handleType === PlaybackDial.HandleTypes.LoopEnd) {
-                radius = loopArcRadius
+                radius = canvasConsts.loopArcRadius
                 angle = loopEnd
             } else if (handleType === PlaybackDial.HandleTypes.RateStart) {
-                radius = rateArcRadius
+                radius = canvasConsts.rateArcRadius
                 angle = rateStart
             } else if (handleType === PlaybackDial.HandleTypes.RateEnd) {
-                radius = rateArcRadius
+                radius = canvasConsts.rateArcRadius
                 angle = rateEnd
             }
 
-            const x = centerX + radius * Math.sin(angle)
-            const y = centerY - radius * Math.cos(angle)
+            const x = canvasConsts.centerX + radius * Math.sin(angle)
+            const y = canvasConsts.centerY - radius * Math.cos(angle)
             return {x: x, y: y}
         }
 
@@ -261,8 +270,8 @@ Item {
         function calculateAngle(point) {
             // turn x and y into cartesian coordinates with
             // canvas center as origin
-            const x = point.x - centerX
-            const y = centerY - point.y
+            const x = point.x - canvasConsts.centerX
+            const y = canvasConsts.centerY - point.y
             if (x > 0 && y < 0) {
                 return (Math.PI / 2) + getAtan(y, x)
             } else if (x < 0 && y < 0) {

@@ -6,7 +6,6 @@
         <file>Constants.js</file>
         <file>AudioSelectionPage.qml</file>
         <file>components/FileHistoryModel.qml</file>
-        <file>components/main copy.qml</file>
         <file>HomePage.qml</file>
     </qresource>
 </RCC>
