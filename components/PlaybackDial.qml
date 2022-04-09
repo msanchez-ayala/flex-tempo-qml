@@ -60,8 +60,8 @@ Item {
             readonly property real centerX: width/2
             readonly property real centerY: height/2
             readonly property int arcLineWidth: 40
-            readonly property real baseArcRadius: (Math.min(width, height) - arcLineWidth)/2
-            readonly property real loopArcRadius: baseArcRadius - arcLineWidth
+            readonly property real playbackArcRadius: (Math.min(width, height) - arcLineWidth)/2
+            readonly property real loopArcRadius: playbackArcRadius - arcLineWidth
             readonly property real rateArcRadius: loopArcRadius - arcLineWidth
             readonly property real handleArcRadius: arcLineWidth/2
         }
@@ -78,11 +78,15 @@ Item {
 
         QtObject {
             id: colors
-            readonly property color baseArc: Material.color(Material.Grey, Material.Shade300)
+            readonly property color playbackArcBg: Material.color(Material.Indigo, Material.Shade50)
             readonly property color playbackArc: Material.color(Material.Indigo, Material.Shade300)
             readonly property color playbackHandle: Material.color(Material.Indigo, Material.Shade700)
+
+            readonly property color loopArcBg: Material.color(Material.Green, Material.Shade100)
             readonly property color loopArc: Material.color(Material.Green, Material.Shade300)
             readonly property color loopHandle: Material.color(Material.Green, Material.Shade700)
+
+            readonly property color rateArcBg: Material.color(Material.Orange, Material.Shade50)
             readonly property color rateArc: Material.color(Material.Orange, Material.Shade200)
             readonly property color rateHandle: Material.color(Material.Orange, Material.Shade700)
         }
@@ -94,14 +98,21 @@ Item {
         onPaint: {
             var ctx = getContext("2d")
             ctx.reset()
-            drawArc(ctx, angles.playbackStart, Constants.Numbers.twoPi, geometry.baseArcRadius, colors.baseArc)
-            drawArc(ctx, angles.playbackStart, angles.playbackEnd, geometry.baseArcRadius, colors.playbackArc)
+            drawArc(ctx, angles.playbackStart, Constants.Numbers.twoPi, geometry.playbackArcRadius, colors.playbackArcBg)
+            drawArc(ctx, angles.playbackStart, angles.playbackEnd, geometry.playbackArcRadius, colors.playbackArc)
+
+            drawArc(ctx, angles.playbackStart, Constants.Numbers.twoPi, geometry.loopArcRadius, colors.loopArcBg)
             drawArc(ctx, angles.loopStart, angles.loopEnd, geometry.loopArcRadius, colors.loopArc)
+
+            drawArc(ctx, angles.rateStart, Constants.Numbers.twoPi, geometry.rateArcRadius, colors.rateArcBg)
             drawArc(ctx, angles.rateStart, angles.rateEnd, geometry.rateArcRadius, colors.rateArc)
+
             drawHandle(ctx, colors.playbackArc, PlaybackDial.HandleTypes.PlaybackStart)
             drawHandle(ctx, colors.playbackHandle, PlaybackDial.HandleTypes.PlaybackEnd)
+
             drawHandle(ctx, colors.loopHandle, PlaybackDial.HandleTypes.LoopStart)
             drawHandle(ctx, colors.loopHandle, PlaybackDial.HandleTypes.LoopEnd)
+
             drawHandle(ctx, colors.rateArc, PlaybackDial.HandleTypes.RateStart)
             drawHandle(ctx, colors.rateHandle, PlaybackDial.HandleTypes.RateEnd)
         }
@@ -215,10 +226,10 @@ Item {
             var angle
             var radius
             if (handleType === PlaybackDial.HandleTypes.PlaybackStart) {
-                radius = geometry.baseArcRadius
+                radius = geometry.playbackArcRadius
                 angle = angles.playbackStart
             } else if (handleType === PlaybackDial.HandleTypes.PlaybackEnd) {
-                radius = geometry.baseArcRadius
+                radius = geometry.playbackArcRadius
                 angle = angles.playbackEnd
             } else if (handleType === PlaybackDial.HandleTypes.LoopStart) {
                 radius = geometry.loopArcRadius

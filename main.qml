@@ -81,7 +81,7 @@ ApplicationWindow {
             loopStartPos: mediaPlayer.loopStartPos
             loopEndPos: mediaPlayer.loopEndPos
 
-            onPlaybackHandleDragged: (newPos) => { console.log('newpos', newPos); mediaPlayer.setPosition(newPos) }
+            onPlaybackHandleDragged: (newPos) => { mediaPlayer.setPosition(newPos) }
             onRateHandleDragged: (newPos) => { mediaPlayer.setPlaybackRate(newPos) }
             onLoopStartHandleDragged: (newPos) => { mediaPlayer.loopStartPos = newPos }
             onLoopEndHandleDragged: (newPos) => { mediaPlayer.loopEndPos = newPos }
