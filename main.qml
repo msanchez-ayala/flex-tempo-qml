@@ -55,8 +55,16 @@ ApplicationWindow {
 
     StackView {
         id: stackView
+        focus: true
         initialItem: homePage
         anchors.fill: parent
+        Keys.onPressed: (event)=> {
+                if (event.key === Qt.Key_Space) {
+                    mediaPlayer.togglePlaybackState()
+                } else if (event.key === Qt.Key_R) {
+                    mediaPlayer.reset()
+                }
+            }
     }
 
     // Put these inside components so that they don't show by defualt
@@ -64,6 +72,7 @@ ApplicationWindow {
     HomePage {
         id: homePage
 
+        focus: true
         playbackMax: mediaPlayer.duration
         playbackPos: mediaPlayer.position
         ratePos: mediaPlayer.playbackRate
@@ -96,6 +105,7 @@ ApplicationWindow {
                 mediaPlayer.position = loopStartPos
             }
         }
+
         Component.onCompleted: {
             durationChanged.connect(updateloopEndPos)
             updateloopEndPos()
@@ -117,6 +127,7 @@ ApplicationWindow {
         }
 
         function reset() {
+            pause()
             setPosition(0)
             loopStartPos = 0
             setPlaybackRate(1)
