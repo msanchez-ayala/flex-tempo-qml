@@ -124,7 +124,7 @@ Page {
 
         Button {
             id: playbackButton
-            text: playing ? 'Pause' : 'Start'
+            text: playing ? 'Pause' : 'Play'
         }
     }
 }

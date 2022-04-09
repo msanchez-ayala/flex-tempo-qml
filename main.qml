@@ -24,13 +24,6 @@ ApplicationWindow {
                 }
             }
         }
-
-        ToolButton {
-            id: startButton
-            anchors.left: toolButton.right
-            text: 'start'
-            onClicked: mediaPlayer.play()
-        }
     }
 
     Drawer {
@@ -108,6 +101,7 @@ ApplicationWindow {
             updateloopEndPos()
 
             homePage.playbackButtonClicked.connect(togglePlaybackState)
+            homePage.resetButtonClicked.connect(reset)
             homePage.playbackHandleDragged.connect(setPosition)
             homePage.rateHandleDragged.connect(setPlaybackRate)
             homePage.loopStartHandleDragged.connect((newPos) => { mediaPlayer.loopStartPos = newPos })
@@ -120,6 +114,13 @@ ApplicationWindow {
             } else {
                 mediaPlayer.play()
             }
+        }
+
+        function reset() {
+            setPosition(0)
+            loopStartPos = 0
+            setPlaybackRate(1)
+            updateloopEndPos()
         }
 
         function updateloopEndPos() {
