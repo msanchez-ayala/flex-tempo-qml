@@ -38,6 +38,8 @@ Item {
     signal loopStartHandleDragged(real newPos)
     signal loopEndHandleDragged(real newPos)
 
+
+
     onPlaybackPosChanged: canvas.requestPaint()
     onLoopStartPosChanged: canvas.requestPaint()
     onLoopEndPosChanged: canvas.requestPaint()
@@ -46,7 +48,6 @@ Item {
 //    Rectangle {
 //        id: debugRect
 //        anchors.fill: root
-//        color: 'transparent'
 //        border.color: 'red'
 //    }
 

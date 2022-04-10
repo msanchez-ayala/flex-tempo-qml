@@ -21,6 +21,9 @@ ApplicationWindow {
 
             ToolButton {
                 id: toolButton
+
+                // TODO: Re-enable later if this becomes necessary
+                visible: false
                 text: stackView.depth > 1 ? "\u25C0" : "\u2630"
                 font.pixelSize: Qt.application.font.pixelSize * 1.6
                 onClicked: {
@@ -161,8 +164,9 @@ ApplicationWindow {
 
         function reset() {
             pause()
-            setPosition(0)
+            // Playback pos can't be 0 if loop start is > 0
             loopStartPos = 0
+            setPosition(0)
             setPlaybackRate(1)
             updateloopEndPos()
         }

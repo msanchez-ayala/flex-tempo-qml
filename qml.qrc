@@ -7,5 +7,10 @@
         <file>AudioSelectionPage.qml</file>
         <file>components/FileHistoryModel.qml</file>
         <file>HomePage.qml</file>
+        <file>components/UnderlinedText.qml</file>
+        <file>icons/attributions.txt</file>
+        <file>icons/loop-end.png</file>
+        <file>icons/loop-start.png</file>
+        <file>icons/rate.png</file>
     </qresource>
 </RCC>
