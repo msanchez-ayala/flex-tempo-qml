@@ -17,7 +17,7 @@ ApplicationWindow {
 
         Row {
             anchors.fill: parent
-//            spacing: Constants.Dimensions.margins
+            spacing: Constants.Dimensions.margins
 
             ToolButton {
                 id: toolButton
@@ -83,7 +83,10 @@ ApplicationWindow {
         id: stackView
         focus: true
         initialItem: homePage
-        anchors.fill: parent
+        anchors {
+            fill: parent
+        }
+
         Keys.onPressed: (event)=> {
                 if (event.key === Qt.Key_Space) {
                     mediaPlayer.togglePlaybackState()

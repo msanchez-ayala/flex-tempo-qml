@@ -158,11 +158,13 @@ Page {
             Button {
                 id: resetButton
                 text: 'Reset'
+                font.pixelSize: Qt.application.font.pixelSize * 1.2
             }
 
             Button {
                 id: playbackButton
                 text: playing ? 'Pause' : 'Play'
+                font.pixelSize: Qt.application.font.pixelSize * 1.2
             }
         }
 

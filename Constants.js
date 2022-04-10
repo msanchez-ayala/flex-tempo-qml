@@ -1,7 +1,7 @@
 .pragma library
 
 const Dimensions = {
-    margins: 12
+    margins: 24
 }
 
 const Numbers = {
