@@ -153,9 +153,6 @@ Page {
             font.pixelSize: Qt.application.font.pixelSize * 1.6
         }
 
-
-
-
         PlaybackDial {
             id: dial
 

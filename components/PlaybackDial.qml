@@ -65,7 +65,7 @@ Item {
             readonly property real loopArcRadius: playbackArcRadius - arcLineWidth
             readonly property real rateArcRadius: loopArcRadius - arcLineWidth
             readonly property real handleArcRadius: arcLineWidth/2
-            readonly property real textSize: handleArcRadius * 0.8
+            readonly property real textSize: handleArcRadius * 0.6
         }
 
         QtObject {
@@ -261,15 +261,14 @@ Item {
         function getHandleText(handleType) {
             var text = ''
             if (handleType === PlaybackDial.HandleTypes.PlaybackEnd) {
-                text = 'p'
+                text = 'time'
             } else if (handleType === PlaybackDial.HandleTypes.LoopStart) {
-                text = 's'
+                text = 'start'
             } else if (handleType === PlaybackDial.HandleTypes.LoopEnd) {
-                text = 'e'
+                text = 'end'
             } else if (handleType === PlaybackDial.HandleTypes.RateEnd) {
-                text = 'r'
+                text = 'rate'
             }
-
             return text
         }
 
