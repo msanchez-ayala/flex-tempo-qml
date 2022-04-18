@@ -5,6 +5,7 @@ import QtQuick.Controls.Material
 import "components"
 import "Constants.js" as Constants
 
+
 Page {
     id: root
 
@@ -55,6 +56,10 @@ Page {
         return Math.floor(ms/1000)
     }
 
+    function songIsEmpty() {
+        return currentSongName === ""
+    }
+
     ColumnLayout  {
 
         anchors {
@@ -75,7 +80,7 @@ Page {
                 id: loopTimeText
 
                 text: {
-                    if (currentSongName === '') {
+                    if (root.songIsEmpty()) {
                         return ''
                     }
                     const startTime = convertMsToTime(root.loopStartPos)
@@ -85,7 +90,13 @@ Page {
                 width: parent.width / 3
                 anchors.right: playbackTimeText.left
                 fontSize: Qt.application.font.pixelSize * 1.2
-                underlineColor: Material.color(Material.Green, Material.Shade700)
+                underlineColor: {
+                    if (root.songIsEmpty()) {
+                        return Material.color(Material.Green, Material.Shade100)
+                    } else {
+                        return Material.color(Material.Green, Material.Shade700)
+                    }
+                }
 
             }
 
@@ -102,7 +113,13 @@ Page {
                 width: parent.width / 3
                 anchors.horizontalCenter: parent.horizontalCenter
                 fontSize: Qt.application.font.pixelSize * 1.2
-                underlineColor: Material.color(Material.Indigo, Material.Shade700)
+                underlineColor: {
+                    if (root.songIsEmpty()) {
+                        return Material.color(Material.Indigo, Material.Shade50)
+                    } else {
+                        return Material.color(Material.Indigo, Material.Shade700)
+                    }
+                }
 
             }
 
@@ -110,7 +127,7 @@ Page {
                 id: playbackRateText
 
                 text: {
-                    if (currentSongName === '') {
+                    if (root.songIsEmpty()) {
                         return ''
                     }
                     return Math.round(root.ratePos * 100).toString() + '%'
@@ -118,15 +135,20 @@ Page {
                 width: parent.width / 3
                 anchors.left: playbackTimeText.right
                 fontSize: Qt.application.font.pixelSize * 1.2
-                underlineColor: Material.color(Material.Orange, Material.Shade700)
+                underlineColor: {
+                    if (root.songIsEmpty()) {
+                        return Material.color(Material.Orange, Material.Shade50)
+                    } else {
+                        return Material.color(Material.Orange, Material.Shade700)}
+                    }
             }
         }
 
         Text {
             id: songNameText
 
-            text: (currentSongName === '') ? 'Select a song' : currentSongName
-            color: (currentSongName === '') ? 'gray' : 'black'
+            text: (root.songIsEmpty()) ? 'Select a song' : currentSongName
+            color: (root.songIsEmpty()) ? 'gray' : 'black'
             Layout.alignment: Qt.AlignHCenter
             font.pixelSize: Qt.application.font.pixelSize * 1.6
         }
@@ -154,6 +176,7 @@ Page {
 
             spacing: Constants.Dimensions.margins
             Layout.alignment: Qt.AlignHCenter
+            enabled: (root.songIsEmpty()) ? false : true
 
             Button {
                 id: resetButton
